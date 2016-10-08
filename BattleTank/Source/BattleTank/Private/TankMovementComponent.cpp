@@ -1,7 +1,6 @@
 // Copyright Denil George
 
 #include "BattleTank.h"
-#include "Tank.h"
 #include "TankTrack.h"
 #include "TankMovementComponent.h"
 
