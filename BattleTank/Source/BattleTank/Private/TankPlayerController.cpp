@@ -2,6 +2,7 @@
 
 #include "BattleTank.h"
 #include "TankAimingComponent.h"
+#include "Tank.h"
 #include "TankPlayerController.h"
 
 
@@ -12,6 +13,24 @@ void ATankPlayerController::BeginPlay()
 	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
 	if (!ensure(AimingComponent)) { return; }
 	FoundAimingComponent(AimingComponent);
+}
+
+void ATankPlayerController::SetPawn(APawn* InPawn)
+{
+	Super::SetPawn(InPawn);
+	if (InPawn)
+	{
+		auto PlayerTank = Cast<ATank>(InPawn);
+		if (!ensure(PlayerTank)) { return; }
+
+		// Subscribe our local  method to the tank's death event
+		PlayerTank->OnDeath.AddUniqueDynamic(this, &ATankPlayerController::OnTankDeath);
+	}
+}
+
+void ATankPlayerController::OnTankDeath()
+{
+	StartSpectatingOnly();
 }
 
 void ATankPlayerController::Tick(float DeltaTime)
@@ -72,7 +91,7 @@ bool ATankPlayerController::GetLookVectorHitLocation(FVector LookDirection, FVec
 			HitResult,
 			StartLocation,
 			EndLocation,
-			ECollisionChannel::ECC_Visibility)
+			ECollisionChannel::ECC_Camera)
 		)
 	{
 		HitLocation = HitResult.Location;
